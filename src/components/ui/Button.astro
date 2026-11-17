@@ -1,0 +1,27 @@
+---
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'secondary' | 'ghost';
+  type?: 'button' | 'submit' | 'reset';
+  external?: boolean;
+  disabled?: boolean;
+  name?: string;
+  value?: string;
+}
+const { href, variant = 'primary', type = 'button', external = false, disabled = false, name, value } = Astro.props;
+---
+{href
+  ? <a class={`btn btn-${variant}`} href={href} {...(external ? { target: '_blank', rel: 'noopener nofollow' } : {})}><slot />{external && <span aria-hidden="true"> ↗</span>}{external && <span class="sr-only"> (se abre en otra pestaña)</span>}</a>
+  : <button class={`btn btn-${variant}`} type={type} disabled={disabled} name={name} value={value}><slot /></button>}
+
+<style>
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.3em; min-height: 2.75rem; padding: 0.55rem 1.2rem; border-radius: var(--radius-pill); border: 2px solid transparent; font: 700 var(--step-0)/1.2 var(--font-body); text-decoration: none; cursor: pointer; transition: transform 0.12s var(--ease), box-shadow 0.12s var(--ease), background 0.12s; }
+  .btn:active { transform: translate(2px, 2px); box-shadow: none !important; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--route); color: var(--route-ink); box-shadow: 3px 3px 0 var(--ink); }
+  .btn-primary:hover { background: var(--route-hover); color: var(--route-ink); transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+  .btn-secondary { background: var(--surface); color: var(--ink); border-color: var(--ink); }
+  .btn-secondary:hover { background: var(--mark); color: var(--mark-ink); border-color: var(--mark-ink); }
+  .btn-ghost { background: transparent; color: var(--ink); }
+  .btn-ghost:hover { background: var(--surface-2); color: var(--ink); }
+</style>

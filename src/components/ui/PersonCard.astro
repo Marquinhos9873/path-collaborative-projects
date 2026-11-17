@@ -1,0 +1,20 @@
+---
+import type { User } from '../../lib/types';
+import { countryName, nivelLabel } from './country';
+interface Props { user: User }
+const { user } = Astro.props;
+const pais = countryName(user.pais);
+---
+<article class="card">
+  <span class="node node-por_confirmar" aria-hidden="true"></span>
+  <h3><a href={`/u/${user.handle}`}>{user.nombre}</a></h3>
+  <ul class="meta">
+    <li>@{user.handle}</li>
+    {user.carrera && <li>{user.carrera}</li>}
+    {pais && <li>{pais}</li>}
+    {user.nivel && <li>{nivelLabel[user.nivel]}</li>}
+  </ul>
+  {user.habilidades.length > 0 && (
+    <div class="foot"><ul class="tags">{user.habilidades.slice(0, 5).map((h) => <li>{h}</li>)}</ul></div>
+  )}
+</article>

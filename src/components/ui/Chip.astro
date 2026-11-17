@@ -1,0 +1,14 @@
+---
+interface Props { label: string; active?: boolean; href?: string }
+const { label, active = false, href } = Astro.props;
+---
+{href
+  ? <a class="chip" href={href} data-active={active} aria-current={active ? 'true' : undefined}>{label}</a>
+  : <span class="chip" data-active={active}>{label}</span>}
+
+<style>
+  .chip { display: inline-flex; align-items: center; min-height: 2rem; padding: 0.2rem 0.8rem; border-radius: var(--radius-pill); border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font-size: var(--step--1); font-weight: 600; text-decoration: none; white-space: nowrap; }
+  a.chip { min-height: 2.5rem; }
+  a.chip:hover { border-color: var(--ink); color: var(--ink); }
+  .chip[data-active='true'] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+</style>

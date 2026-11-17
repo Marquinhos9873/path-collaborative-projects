@@ -1,0 +1,28 @@
+---
+import type { Project } from '../../lib/types';
+import StatusBadge from './StatusBadge.astro';
+import { countryName } from './country';
+interface Props { project: Project }
+const { project } = Astro.props;
+const pais = countryName(project.pais);
+const busca = project.perfiles_buscados.length > 0;
+---
+<article class="card">
+  <span class={`node ${busca ? 'node-reclutando' : 'node-por_confirmar'}`} aria-hidden="true"></span>
+  <h3><a href={`/proyectos/${project.slug}`}>{project.nombre}</a></h3>
+  <ul class="meta">
+    <li>Proyecto</li>
+    {project.area && <li>{project.area}</li>}
+    {pais && <li>{pais}</li>}
+  </ul>
+  {project.resumen && <p class="resumen">{project.resumen}</p>}
+  <div class="foot">
+    {busca && <StatusBadge kind="reclutando" />}
+    {busca && (
+      <>
+        <span>Buscan:</span>
+        <ul class="tags">{project.perfiles_buscados.slice(0, 4).map((p) => <li>{p}</li>)}</ul>
+      </>
+    )}
+  </div>
+</article>

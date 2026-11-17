@@ -1,0 +1,89 @@
+---
+import type { TeamFilter } from '../../lib/types';
+import { countryName } from './country';
+interface Props {
+  values: TeamFilter;
+  facets: { paises: string[]; areas: string[] };
+  action?: string;
+  hidden?: Record<string, string>; // p. ej. { tab: 'equipos' }
+}
+const { values, facets, action, hidden = {} } = Astro.props;
+const modalidades = [['', 'Todas'], ['presencial', 'Presencial'], ['remoto', 'Remoto'], ['hibrido', 'Híbrido']];
+const estados = [['', 'Todos'], ['si', 'Reclutando'], ['por_confirmar', 'Por confirmar'], ['no', 'Cerrado']];
+const hasFilters = !!(values.pais || values.area || values.modalidad || values.reclutando);
+---
+<form class="filters" method="get" action={action} role="search">
+  {Object.entries(hidden).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
+  <div class="search">
+    <label class="sr-only" for="fb-q">Buscar</label>
+    <input id="fb-q" type="search" name="q" value={values.q ?? ''} placeholder="Busca por nombre o tema" maxlength="100" />
+    <button type="submit">Buscar</button>
+  </div>
+  <details open={hasFilters}>
+    <summary>Filtros{hasFilters ? ' (activos)' : ''}</summary>
+    <div class="grid">
+      <div class="sel">
+        <label for="fb-pais">País</label>
+        <select id="fb-pais" name="pais">
+          <option value="">Todos</option>
+          {facets.paises.map((p) => <option value={p} selected={values.pais === p}>{countryName(p)}</option>)}
+        </select>
+      </div>
+      <div class="sel">
+        <label for="fb-area">Área</label>
+        <select id="fb-area" name="area">
+          <option value="">Todas</option>
+          {facets.areas.map((a) => <option value={a} selected={values.area === a}>{a}</option>)}
+        </select>
+      </div>
+      <fieldset>
+        <legend>Modalidad</legend>
+        <div class="opts">
+          {modalidades.map(([v, l]) => (
+            <label class="opt"><input type="radio" name="modalidad" value={v} checked={(values.modalidad ?? '') === v} /><span>{l}</span></label>
+          ))}
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Reclutando</legend>
+        <div class="opts">
+          {estados.map(([v, l]) => (
+            <label class="opt"><input type="radio" name="reclutando" value={v} checked={(values.reclutando ?? '') === v} /><span>{l}</span></label>
+          ))}
+        </div>
+      </fieldset>
+    </div>
+    <div class="actions">
+      <button type="submit" class="apply">Aplicar filtros</button>
+      {hasFilters && <a href={action ?? '?'}>Quitar filtros</a>}
+    </div>
+  </details>
+</form>
+
+<style>
+  .filters { display: grid; gap: var(--space-3); }
+  .search { display: flex; gap: var(--space-2); }
+  .search input { flex: 1; min-width: 0; min-height: 3rem; padding: 0.6rem 1rem; font: inherit; color: var(--ink); background: var(--surface); border: 2px solid var(--ink); border-radius: var(--radius-pill); }
+  .search input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  button { min-height: 3rem; padding: 0 1.3rem; font: 700 var(--step-0) var(--font-body); background: var(--route); color: var(--route-ink); border: 2px solid transparent; border-radius: var(--radius-pill); cursor: pointer; box-shadow: 3px 3px 0 var(--ink); }
+  button:hover { background: var(--route-hover); }
+  button:active { transform: translate(2px, 2px); box-shadow: none; }
+  button.apply { min-height: 2.75rem; }
+  summary { cursor: pointer; font-weight: 700; padding: var(--space-2) 0; width: fit-content; }
+  .grid { display: grid; gap: var(--space-4); padding-block: var(--space-3); }
+  @media (min-width: 48rem) { .grid { grid-template-columns: 1fr 1fr; } }
+  .sel { display: grid; gap: var(--space-1); }
+  .sel label, legend { font-weight: 700; font-size: var(--step--1); padding: 0; }
+  select { min-height: 2.75rem; padding: 0.5rem 0.8rem; font: inherit; color: var(--ink); background: var(--surface); border: 2px solid var(--ink-soft); border-radius: var(--radius-field); }
+  select:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  legend { margin-bottom: var(--space-1); }
+  .opts { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .opt { position: relative; }
+  .opt input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+  .opt span { display: inline-flex; align-items: center; min-height: 2.5rem; padding: 0.2rem 0.9rem; border-radius: var(--radius-pill); border: 1.5px solid var(--line); background: var(--surface); font-size: var(--step--1); font-weight: 600; }
+  .opt:hover span { border-color: var(--ink); }
+  .opt input:checked + span { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .opt input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+</style>

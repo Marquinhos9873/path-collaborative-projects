@@ -1,0 +1,47 @@
+---
+interface Option { value: string; label: string }
+interface Props {
+  label: string;
+  name: string;
+  type?: string;
+  value?: string | number | null;
+  hint?: string;
+  error?: string;
+  required?: boolean;
+  multiline?: boolean;
+  rows?: number;
+  maxlength?: number;
+  placeholder?: string;
+  options?: Option[];
+}
+const { label, name, type = 'text', value = '', hint, error, required = false, multiline = false, rows = 6, maxlength, placeholder, options } = Astro.props;
+const id = `f-${name}`;
+const describedby = [hint && `${id}-hint`, error && `${id}-err`].filter(Boolean).join(' ') || undefined;
+---
+<div class="field">
+  <label for={id}>{label}{required && <span class="req" aria-hidden="true"> *</span>}</label>
+  {hint && <p class="hint" id={`${id}-hint`}>{hint}</p>}
+  {options
+    ? <select id={id} name={name} required={required} aria-describedby={describedby} aria-invalid={error ? 'true' : undefined}>
+        {options.map((o) => <option value={o.value} selected={String(value ?? '') === o.value}>{o.label}</option>)}
+      </select>
+    : multiline
+      ? <textarea id={id} name={name} rows={rows} maxlength={maxlength} required={required} placeholder={placeholder} aria-describedby={describedby} aria-invalid={error ? 'true' : undefined}>{value ?? ''}</textarea>
+      : <input id={id} name={name} type={type} value={value ?? ''} maxlength={maxlength} required={required} placeholder={placeholder} aria-describedby={describedby} aria-invalid={error ? 'true' : undefined} />}
+  {error && <p class="err" id={`${id}-err`}>{error}</p>}
+</div>
+
+<style>
+  .field { display: grid; gap: var(--space-1); }
+  label { font-weight: 700; font-size: var(--step--1); }
+  .req { color: var(--chicha); }
+  .hint, .err { margin: 0; font-size: var(--step--1); }
+  .hint { color: var(--ink-soft); }
+  .err { color: var(--chicha); font-weight: 600; }
+  input, select, textarea { width: 100%; min-height: 2.75rem; padding: 0.6rem 0.8rem; font: inherit; color: var(--ink); background: var(--surface); border: 2px solid var(--ink-soft); border-radius: var(--radius-field); }
+  textarea { resize: vertical; line-height: 1.5; }
+  input::placeholder, textarea::placeholder { color: var(--ink-soft); opacity: 0.8; }
+  input:hover, select:hover, textarea:hover { border-color: var(--ink); }
+  input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-color: var(--ink); }
+  [aria-invalid='true'] { border-color: var(--chicha); }
+</style>

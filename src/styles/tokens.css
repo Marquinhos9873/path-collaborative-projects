@@ -1,0 +1,83 @@
+/* Tokens de Path. Fuente de verdad: DESIGN.md */
+:root {
+  color-scheme: light dark;
+
+  --paper: #f1f4ee;      /* Papel de calco */
+  --surface: #fbfcf9;
+  --surface-2: #e6ebe3;
+  --ink: #12302b;        /* Tinta abeto */
+  --ink-soft: #46605a;
+  --line: #c9d3c9;
+  --route: #2c45d4;      /* Ruta (cobalto): acción y enlaces */
+  --route-ink: #ffffff;
+  --route-hover: #2237b0;
+  --mark: #ffc93c;       /* Maracuyá: reclutando */
+  --mark-ink: #3b2a00;
+  --chicha: #c2175f;     /* Chicha: énfasis puntual, errores */
+  --focus: #2c45d4;
+
+  --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --step--1: 0.8125rem;
+  --step-0: 1rem;
+  --step-1: 1.1875rem;
+  --step-2: clamp(1.4rem, 1.2rem + 0.9vw, 1.75rem);
+  --step-3: clamp(1.9rem, 1.4rem + 2.2vw, 2.9rem);
+  --step-4: clamp(2.3rem, 1.5rem + 3.8vw, 4.2rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2.5rem;
+  --space-7: 4rem;
+
+  --radius-card: 14px;
+  --radius-field: 10px;
+  --radius-pill: 999px;
+
+  --wrap: 72rem;
+  --gutter: 1rem;
+  --shadow-sticker: 4px 4px 0 var(--ink);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (min-width: 48rem) {
+  :root { --gutter: 2rem; }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #0e1f1c;
+    --surface: #152a26;
+    --surface-2: #1d3833;
+    --ink: #e7efe9;
+    --ink-soft: #a5bab3;
+    --line: #2d4943;
+    --route: #94a6ff;
+    --route-ink: #0e1f1c;
+    --route-hover: #b4c0ff;
+    --mark: #ffc93c;
+    --mark-ink: #3b2a00;
+    --chicha: #ff7fb3;
+    --focus: #ffc93c;
+    --shadow-sticker: 4px 4px 0 var(--mark);
+  }
+}
+
+:root[data-theme='dark'] {
+  --paper: #0e1f1c;
+  --surface: #152a26;
+  --surface-2: #1d3833;
+  --ink: #e7efe9;
+  --ink-soft: #a5bab3;
+  --line: #2d4943;
+  --route: #94a6ff;
+  --route-ink: #0e1f1c;
+  --route-hover: #b4c0ff;
+  --chicha: #ff7fb3;
+  --focus: #ffc93c;
+  --shadow-sticker: 4px 4px 0 var(--mark);
+}

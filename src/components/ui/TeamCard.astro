@@ -1,0 +1,24 @@
+---
+import type { Team } from '../../lib/types';
+import StatusBadge from './StatusBadge.astro';
+import { countryName, tipoLabel, modalidadLabel } from './country';
+interface Props { team: Team }
+const { team } = Astro.props;
+const pais = countryName(team.pais);
+const kind = ({ si: 'reclutando', no: 'cerrado', por_confirmar: 'por_confirmar' } as const)[team.reclutando];
+---
+<article class="card">
+  <span class={`node node-${kind}`} aria-hidden="true"></span>
+  <h3><a href={`/equipos/${team.slug}`}>{team.nombre}</a></h3>
+  <ul class="meta">
+    <li>{tipoLabel[team.tipo] ?? team.tipo}</li>
+    {pais && <li>{pais}</li>}
+    {team.modalidad && <li>{modalidadLabel[team.modalidad]}</li>}
+  </ul>
+  {team.resumen && <p class="resumen">{team.resumen}</p>}
+  <div class="foot">
+    <StatusBadge kind={kind} />
+    {team.ciclo_anual && <span>{team.ciclo_anual}</span>}
+    {team.origen === 'curado' && <span>Listado por Path{team.verificado_en ? `, verificado el ${team.verificado_en}` : ''}</span>}
+  </div>
+</article>

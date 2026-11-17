@@ -1,0 +1,23 @@
+---
+interface Props { title: string; action?: { label: string; href: string } }
+const { title, action } = Astro.props;
+---
+<div class="empty" role="status">
+  <svg width="120" height="56" viewBox="0 0 120 56" fill="none" aria-hidden="true">
+    <path d="M6 44 C 24 44, 28 14, 50 14 S 76 40, 96 28" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="1 6" />
+    <circle cx="6" cy="44" r="4" fill="var(--ink)" />
+    <circle cx="106" cy="24" r="9" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-dasharray="3 4" />
+  </svg>
+  <h2>{title}</h2>
+  <div class="body"><slot /></div>
+  {action && <a class="act" href={action.href}>{action.label}</a>}
+</div>
+
+<style>
+  .empty { border: 2px dashed var(--line); border-radius: var(--radius-card); padding: var(--space-6) var(--space-5); display: grid; justify-items: start; gap: var(--space-2); }
+  h2 { font-size: var(--step-2); margin: var(--space-2) 0 0; }
+  .body { color: var(--ink-soft); max-width: 60ch; }
+  .body:empty { display: none; }
+  .act { display: inline-flex; align-items: center; min-height: 2.75rem; margin-top: var(--space-2); padding: 0.55rem 1.2rem; font-weight: 700; border-radius: var(--radius-pill); background: var(--route); color: var(--route-ink); text-decoration: none; box-shadow: 3px 3px 0 var(--ink); }
+  .act:hover { background: var(--route-hover); color: var(--route-ink); }
+</style>

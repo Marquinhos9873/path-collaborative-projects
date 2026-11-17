@@ -1,0 +1,69 @@
+---
+import '../styles/global.css';
+interface Props { title: string; description?: string }
+const { title, description = 'Path conecta a estudiantes con equipos, proyectos y personas para construir juntos.' } = Astro.props;
+const full = title === 'Path' ? 'Path' : `${title} - Path`;
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f1f4ee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1f1c" media="(prefers-color-scheme: dark)" />
+    <title>{full}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={full} />
+    <meta property="og:description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400;500;600;700&display=swap" />
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <header class="site-header">
+      <div class="wrap bar">
+        <a class="brand" href="/" aria-label="Path, inicio">
+          <svg width="44" height="24" viewBox="0 0 44 24" fill="none" aria-hidden="true">
+            <path class="logo-path" d="M4 18 C 12 18, 12 6, 20 6 S 30 18, 38 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="1 5" />
+            <circle cx="4" cy="18" r="3.2" fill="currentColor" />
+            <circle cx="39" cy="12" r="4" fill="var(--mark)" stroke="currentColor" stroke-width="2" />
+          </svg>
+          <span>path</span>
+        </a>
+        <nav class="nav" aria-label="Principal">
+          <a href="/explorar?tab=equipos">Equipos</a>
+          <a href="/explorar?tab=proyectos">Proyectos</a>
+          <a href="/explorar?tab=personas">Personas</a>
+        </nav>
+        <div class="extra"><slot name="header-extra" /></div>
+      </div>
+    </header>
+    <main id="contenido"><slot /></main>
+    <footer class="site-footer">
+      <div class="wrap foot">
+        <p><strong>Path</strong> solo te conecta: cada equipo y cada persona vive en su propia página.</p>
+        <p class="muted">Los datos marcados como por confirmar aún no los verificó el equipo.</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  .site-header { border-bottom: 1px solid var(--line); background: var(--paper); position: sticky; top: 0; z-index: 20; }
+  .site-header .bar { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2) var(--space-5); padding-block: var(--space-3); }
+  .brand { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--ink); text-decoration: none; font: 800 1.6rem/1 var(--font-display); letter-spacing: -0.04em; }
+  .brand:hover { color: var(--ink); }
+  .nav { display: flex; gap: var(--space-1); margin-inline-end: auto; }
+  .nav a { color: var(--ink); text-decoration: none; font-weight: 600; padding: var(--space-2) var(--space-3); border-radius: var(--radius-pill); }
+  .nav a:hover { background: var(--surface-2); color: var(--ink); }
+  .extra { display: flex; gap: var(--space-2); align-items: center; }
+  @media (max-width: 34rem) {
+    .site-header .bar { gap: var(--space-2); }
+    .nav { order: 3; width: 100%; margin-inline: -0.75rem; overflow-x: auto; }
+  }
+  main { flex: 1; padding-block: var(--space-6) var(--space-7); }
+  .site-footer { border-top: 1px solid var(--line); padding-block: var(--space-5); font-size: var(--step--1); }
+  .site-footer p { margin: 0 0 var(--space-1); }
+</style>

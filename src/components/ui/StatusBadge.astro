@@ -1,0 +1,19 @@
+---
+interface Props { kind: 'reclutando' | 'cerrado' | 'por_confirmar' }
+const { kind } = Astro.props;
+const label = { reclutando: 'Reclutando', cerrado: 'Cerrado', por_confirmar: 'Por confirmar' }[kind];
+---
+<span class={`badge badge-${kind}`}>
+  <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.2" /></svg>
+  {label}
+</span>
+
+<style>
+  .badge { display: inline-flex; align-items: center; gap: 0.4em; font-size: var(--step--1); font-weight: 700; line-height: 1; padding: 0.4em 0.7em 0.4em 0.55em; border-radius: var(--radius-pill); border: 2px solid var(--ink); }
+  svg circle { stroke-width: 2; stroke: currentColor; fill: none; }
+  .badge-reclutando { background: var(--mark); color: var(--mark-ink); border-color: var(--mark-ink); }
+  .badge-reclutando circle { fill: currentColor; }
+  .badge-cerrado { background: transparent; color: var(--ink-soft); border-color: var(--line); }
+  .badge-por_confirmar { background: transparent; color: var(--ink); border-style: dashed; }
+  .badge-por_confirmar circle { stroke-dasharray: 2.5 2.5; }
+</style>
