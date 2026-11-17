@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "path-hub",
+  "main": "dist/_worker.js/index.js",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "binding": "ASSETS", "directory": "./dist" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "path-db",
+      "database_id": "97520726-ca13-4f09-9d98-8ec009d6456a",
+      "migrations_dir": "migrations"
+    }
+  ],
+}
