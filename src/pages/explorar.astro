@@ -1,0 +1,64 @@
+---
+import Base from '../layouts/Base.astro';
+import TeamCard from '../components/ui/TeamCard.astro';
+import ProjectCard from '../components/ui/ProjectCard.astro';
+import PersonCard from '../components/ui/PersonCard.astro';
+import FilterBar from '../components/ui/FilterBar.astro';
+import EmptyState from '../components/ui/EmptyState.astro';
+import { listTeams, listProjects, listUsers } from '../lib/db';
+import { parseTab, parseFilter, qs, safe, TABS, FACET_PAISES, FACET_AREAS } from './_parse';
+
+const { db } = Astro.locals;
+const params = Astro.url.searchParams;
+const tab = parseTab(params);
+const f = parseFilter(params);
+const empty = { items: [], total: 0, page: f.page ?? 1, pageSize: 20 as const };
+
+const teams = tab === 'equipos' ? await safe(() => listTeams(db, f), empty) : null;
+const projects = tab === 'proyectos' ? await safe(() => listProjects(db, { q: f.q, pais: f.pais, area: f.area, page: f.page }), empty) : null;
+const people = tab === 'personas' ? await safe(() => listUsers(db, { q: f.q, pais: f.pais, page: f.page }), empty) : null;
+const result = teams ?? projects ?? people!;
+const totalPages = Math.max(1, Math.ceil(result.total / 20));
+
+const base = { tab, q: f.q, pais: f.pais, area: f.area, modalidad: f.modalidad, reclutando: f.reclutando };
+const pageHref = (p: number) => `/explorar${qs({ ...base, page: p > 1 ? p : undefined })}`;
+const tabHref = (t: string) => `/explorar${qs({ tab: t, q: f.q, pais: f.pais, area: f.area })}`;
+const labels: Record<string, string> = { equipos: 'Equipos', proyectos: 'Proyectos', personas: 'Personas' };
+---
+<Base title="Explorar" description="Busca equipos, proyectos y personas con quienes construir algo.">
+  <section class="explorar">
+    <h1>Explorar</h1>
+    <p>Encuentra con quién construir. Filtra por país, área y si están reclutando.</p>
+
+    <nav class="tabs" aria-label="Qué quieres explorar">
+      {TABS.map((t) => (
+        <a href={tabHref(t)} class:list={['tab', { active: t === tab }]} aria-current={t === tab ? 'page' : undefined}>{labels[t]}</a>
+      ))}
+    </nav>
+
+    <FilterBar action="/explorar" hidden={{ tab }} values={f} facets={{ paises: FACET_PAISES, areas: FACET_AREAS }} />
+
+    <p class="result-count" role="status">{result.total} {result.total === 1 ? 'resultado' : 'resultados'}</p>
+
+    {result.items.length === 0 ? (
+      <EmptyState
+        title="No encontramos nada con esos filtros. Prueba quitando alguno o crea tú la ficha que falta."
+        action={{ label: 'Limpiar filtros', href: `/explorar?tab=${tab}` }}
+      />
+    ) : (
+      <ul class="grid" role="list">
+        {teams && teams.items.map((t) => <li><TeamCard team={t} /></li>)}
+        {projects && projects.items.map((p) => <li><ProjectCard project={p} /></li>)}
+        {people && people.items.map((u) => <li><PersonCard user={u} /></li>)}
+      </ul>
+    )}
+
+    {totalPages > 1 && (
+      <nav class="pager" aria-label="Paginación">
+        {result.page > 1 && <a rel="prev" href={pageHref(result.page - 1)}>← Anterior</a>}
+        <span>Página {result.page} de {totalPages}</span>
+        {result.page < totalPages && <a rel="next" href={pageHref(result.page + 1)}>Siguiente →</a>}
+      </nav>
+    )}
+  </section>
+</Base>

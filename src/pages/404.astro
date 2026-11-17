@@ -1,0 +1,8 @@
+---
+import Base from '../layouts/Base.astro';
+import EmptyState from '../components/ui/EmptyState.astro';
+Astro.response.status = 404;
+---
+<Base title="No encontramos esa página">
+  <EmptyState title="No encontramos lo que buscabas. Puede que la ficha ya no exista o esté oculta." action={{ label: 'Volver a explorar', href: '/explorar' }} />
+</Base>

@@ -1,0 +1,34 @@
+---
+import NotFound from '../_parts/NotFound.astro';
+import Base from '../../layouts/Base.astro';
+import Chip from '../../components/ui/Chip.astro';
+import Readme from '../_parts/Readme.astro';
+import ReportButton from '../_parts/ReportButton.astro';
+import { getUserByHandle } from '../../lib/db';
+import { safe, safeHttps, paisNombre } from '../_parse';
+
+const person = await safe(() => getUserByHandle(Astro.locals.db, Astro.params.handle ?? ''), null);
+const missing = !person || person.estado === 'hidden';
+if (missing) Astro.response.status = 404;
+const enlace = safeHttps(person?.enlace);
+const propio = Astro.locals.user?.id === person?.id;
+---
+<Base title={person?.nombre ?? 'No encontrada'} description={person?.carrera ?? undefined}>
+  {missing || !person ? <NotFound /> : (
+  <article class="ficha">
+    <header>
+      <p class="kicker">@{person.handle}{person.pais ? ` · ${paisNombre(person.pais)}` : ''}</p>
+      <h1>{person.nombre}</h1>
+      {person.carrera && <p class="resumen">{person.carrera}</p>}
+      <ul class="chips" role="list">
+        {person.nivel && <li><Chip label={person.nivel} /></li>}
+        {person.habilidades.map((h) => <li><Chip label={h} /></li>)}
+      </ul>
+      {enlace && <a class="btn" href={enlace} target="_blank" rel="noopener nofollow">Ir a su página ↗</a>}
+      {propio && <a href="/cuenta">Editar mi perfil</a>}
+    </header>
+    <Readme md={person.readme} />
+    <footer><ReportButton kind="user" id={person.id} /></footer>
+  </article>
+  )}
+</Base>

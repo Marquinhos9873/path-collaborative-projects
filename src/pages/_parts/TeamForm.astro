@@ -1,0 +1,37 @@
+---
+import ReadmeEditor from './ReadmeEditor.astro';
+import { FACET_PAISES, FACET_AREAS, NIVELES, TIPOS, paisNombre } from '../_parse';
+import type { NewTeam } from '../../lib/types';
+interface Props { values?: Partial<NewTeam>; errors?: string[]; action: string; submit: string }
+const { values = {}, errors = [], action, submit } = Astro.props;
+const tri = [['por_confirmar', 'Por confirmar'], ['si', 'Sí'], ['no', 'No']];
+---
+<form method="post" action={action} class="form">
+  {errors.length > 0 && <ul class="errores" role="alert">{errors.map((e) => <li>{e}</li>)}</ul>}
+  <label for="nombre">Nombre del equipo</label>
+  <input id="nombre" name="nombre" required minlength="2" maxlength="80" value={values.nombre ?? ''} />
+  <label for="tipo">Tipo</label>
+  <select id="tipo" name="tipo">{TIPOS.map((t) => <option value={t} selected={values.tipo === t}>{t}</option>)}</select>
+  <label for="resumen">Resumen en una frase (máx. 200)</label>
+  <input id="resumen" name="resumen" maxlength="200" value={values.resumen ?? ''} />
+  <label for="pais">País</label>
+  <select id="pais" name="pais"><option value="">Sin indicar</option>{FACET_PAISES.map((p) => <option value={p} selected={values.pais === p}>{paisNombre(p)}</option>)}</select>
+  <label for="area">Área</label>
+  <select id="area" name="area"><option value="">Sin indicar</option>{FACET_AREAS.map((a) => <option value={a} selected={values.area === a}>{a}</option>)}</select>
+  <label for="modalidad">Modalidad</label>
+  <select id="modalidad" name="modalidad"><option value="">Sin indicar</option>{['presencial', 'remoto', 'hibrido'].map((m) => <option value={m} selected={values.modalidad === m}>{m}</option>)}</select>
+  <label for="nivel">Nivel</label>
+  <select id="nivel" name="nivel"><option value="">Sin indicar</option>{NIVELES.map((n) => <option value={n} selected={values.nivel === n}>{n}</option>)}</select>
+  <label for="reclutando">¿Están reclutando?</label>
+  <select id="reclutando" name="reclutando">{tri.map(([v, l]) => <option value={v} selected={(values.reclutando ?? 'por_confirmar') === v}>{l}</option>)}</select>
+  <label for="abierto_a_externos">¿Abierto a gente de otras universidades?</label>
+  <select id="abierto_a_externos" name="abierto_a_externos">{tri.map(([v, l]) => <option value={v} selected={(values.abierto_a_externos ?? 'por_confirmar') === v}>{l}</option>)}</select>
+  <label for="ciclo_anual">Ciclo (ej. abre cada agosto)</label>
+  <input id="ciclo_anual" name="ciclo_anual" maxlength="80" value={values.ciclo_anual ?? ''} />
+  <label for="proxima_apertura">Próxima apertura</label>
+  <input id="proxima_apertura" name="proxima_apertura" maxlength="80" value={values.proxima_apertura ?? ''} />
+  <label for="enlace">Enlace a su web (https://)</label>
+  <input id="enlace" name="enlace" type="url" pattern="https://.*" value={values.enlace ?? ''} />
+  <ReadmeEditor value={values.readme ?? ''} />
+  <button type="submit">{submit}</button>
+</form>

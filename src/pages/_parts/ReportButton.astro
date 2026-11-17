@@ -1,0 +1,32 @@
+---
+// Botón "Reportar": POST /api/report con JSON; sin JS cae a un formulario simple.
+interface Props { kind: 'team' | 'project' | 'user'; id: string }
+const { kind, id } = Astro.props;
+---
+<details class="report" data-kind={kind} data-id={id}>
+  <summary>Reportar</summary>
+  <form method="post" action="/api/report" class="report-form">
+    <input type="hidden" name="kind" value={kind} />
+    <input type="hidden" name="id" value={id} />
+    <label for={`motivo-${id}`}>¿Qué pasa con esta ficha?</label>
+    <textarea id={`motivo-${id}`} name="motivo" rows="3" maxlength="500" required></textarea>
+    <button type="submit">Enviar reporte</button>
+    <p class="report-msg" role="status" aria-live="polite"></p>
+  </form>
+</details>
+<script>
+  document.querySelectorAll<HTMLDetailsElement>('details.report').forEach((d) => {
+    const form = d.querySelector('form')!;
+    const msg = d.querySelector('.report-msg')!;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const body = { kind: d.dataset.kind, id: d.dataset.id, motivo: (form.elements.namedItem('motivo') as HTMLTextAreaElement).value };
+      try {
+        const r = await fetch('/api/report', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+        msg.textContent = r.status === 204 ? 'Gracias, lo revisaremos.' : r.status === 401 ? 'Inicia sesión para reportar.' : 'No pudimos enviar el reporte. Inténtalo de nuevo.';
+      } catch {
+        msg.textContent = 'No pudimos enviar el reporte. Inténtalo de nuevo.';
+      }
+    });
+  });
+</script>

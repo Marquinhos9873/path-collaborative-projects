@@ -1,0 +1,55 @@
+---
+import Base from '../../layouts/Base.astro';
+import ReadmeEditor from '../_parts/ReadmeEditor.astro';
+import { updateUser } from '../../lib/db';
+import { NIVELES, FACET_PAISES, paisNombre, parseProfileForm } from '../_parse';
+
+let user = Astro.locals.user;
+if (!user) return Astro.redirect('/entrar');
+
+let errors: string[] = [];
+let saved = false;
+if (Astro.request.method === 'POST') {
+  const { value, errors: errs } = parseProfileForm(await Astro.request.formData());
+  errors = errs;
+  if (errs.length === 0) {
+    try {
+      user = (await updateUser(Astro.locals.db, user.id, value)) ?? { ...user, ...value };
+      saved = true;
+    } catch {
+      errors = ['No pudimos guardar tus cambios. Inténtalo de nuevo.'];
+      Astro.response.status = 500;
+    }
+  } else {
+    Astro.response.status = 400;
+    user = { ...user, ...value };
+  }
+}
+---
+<Base title="Mi cuenta">
+  <section class="cuenta">
+    <h1>Tu perfil</h1>
+    <p>Esto es lo que verán otras personas en <a href={`/u/${user.handle}`}>/u/{user.handle}</a>.</p>
+    {saved && <p class="ok" role="status">Listo, guardamos tus cambios.</p>}
+    {errors.length > 0 && <ul class="errores" role="alert">{errors.map((e) => <li>{e}</li>)}</ul>}
+    <form method="post" class="form">
+      <label for="nombre">Nombre</label>
+      <input id="nombre" name="nombre" required minlength="2" maxlength="80" value={user.nombre} />
+      <label for="carrera">Carrera</label>
+      <input id="carrera" name="carrera" maxlength="80" value={user.carrera ?? ''} />
+      <label for="pais">País</label>
+      <select id="pais" name="pais"><option value="">Sin indicar</option>{FACET_PAISES.filter((p) => p !== 'xx').map((p) => <option value={p} selected={user!.pais === p}>{paisNombre(p)}</option>)}</select>
+      <label for="nivel">Nivel</label>
+      <select id="nivel" name="nivel"><option value="">Sin indicar</option>{NIVELES.map((n) => <option value={n} selected={user!.nivel === n}>{n}</option>)}</select>
+      <label for="habilidades">Habilidades (separadas por comas)</label>
+      <input id="habilidades" name="habilidades" value={user.habilidades.join(', ')} />
+      <label for="enlace">Tu web o portafolio (https://)</label>
+      <input id="enlace" name="enlace" type="url" pattern="https://.*" value={user.enlace ?? ''} />
+      <ReadmeEditor value={user.readme} />
+      <button type="submit">Guardar cambios</button>
+    </form>
+    <h2>Tus equipos</h2>
+    <p><a class="btn" href="/cuenta/equipos/nuevo">Crear un equipo</a></p>
+    <form method="post" action="/api/auth/logout"><button type="submit">Salir</button></form>
+  </section>
+</Base>

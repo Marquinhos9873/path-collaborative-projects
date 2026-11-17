@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+const noDisponible = Astro.url.searchParams.get('error') === 'no_disponible';
+if (Astro.locals.user) return Astro.redirect('/cuenta');
+---
+<Base title="Entrar" description="Entra a Path con tu cuenta de Google o GitHub. Sin contraseñas.">
+  <section class="entrar">
+    <h1>Entra a Path</h1>
+    <p>Usa tu cuenta de Google o GitHub. No guardamos contraseñas.</p>
+    {noDisponible && <p class="aviso" role="alert">Inicio de sesión no disponible por ahora. Puedes seguir explorando mientras lo activamos.</p>}
+    <p class="acciones">
+      <a class="btn" href="/api/auth/google/login">Entrar con Google</a>
+      <a class="btn" href="/api/auth/github/login">Entrar con GitHub</a>
+    </p>
+    <p><a href="/explorar">Seguir explorando sin cuenta</a></p>
+  </section>
+</Base>

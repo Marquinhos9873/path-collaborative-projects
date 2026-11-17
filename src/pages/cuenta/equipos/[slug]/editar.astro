@@ -1,0 +1,48 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import TeamForm from '../../../_parts/TeamForm.astro';
+import EmptyState from '../../../../components/ui/EmptyState.astro';
+import { getTeamBySlug, updateTeam } from '../../../../lib/db';
+import { parseTeamForm, safe } from '../../../_parse';
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/entrar');
+
+const team = await safe(() => getTeamBySlug(Astro.locals.db, Astro.params.slug ?? ''), null);
+if (!team || team.estado === 'hidden') return Astro.rewrite('/404');
+
+// En POST el dueño lo valida updateTeam (lanza Forbidden); en GET basta comparar.
+let forbidden = Astro.request.method !== 'POST' && team.owner_id !== user.id;
+let errors: string[] = [];
+let values: Partial<typeof team> = team;
+if (Astro.request.method === 'POST') {
+  const { value, errors: errs } = parseTeamForm(await Astro.request.formData());
+  values = value;
+  errors = errs;
+  if (errs.length === 0) {
+    try {
+      const updated = await updateTeam(Astro.locals.db, team.id, user.id, value);
+      return Astro.redirect(`/equipos/${updated.slug}`, 303);
+    } catch (e) {
+      if ((e as Error).name === 'Forbidden') forbidden = true;
+      else { errors = ['No pudimos guardar los cambios. Inténtalo de nuevo.']; Astro.response.status = 500; }
+    }
+  } else {
+    Astro.response.status = 400;
+  }
+}
+// Un POST de un usuario que no es dueño también debe terminar en 403 aunque pase por updateTeam.
+if (forbidden) Astro.response.status = 403;
+---
+<Base title={`Editar ${team.nombre}`}>
+  <section class="cuenta">
+    {forbidden ? (
+      <EmptyState title="Solo quien creó este equipo puede editarlo." action={{ label: 'Volver a la ficha', href: `/equipos/${team.slug}` }} />
+    ) : (
+      <>
+        <h1>Editar {team.nombre}</h1>
+        <TeamForm values={values} errors={errors} action={`/cuenta/equipos/${team.slug}/editar`} submit="Guardar cambios" />
+      </>
+    )}
+  </section>
+</Base>

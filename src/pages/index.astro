@@ -1,16 +1,43 @@
 ---
----
+import Base from '../layouts/Base.astro';
+import TeamCard from '../components/ui/TeamCard.astro';
+import FilterBar from '../components/ui/FilterBar.astro';
+import EmptyState from '../components/ui/EmptyState.astro';
+import { listTeams } from '../lib/db';
+import { safe, FACET_PAISES, FACET_AREAS } from './_parse';
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+const { db } = Astro.locals;
+const empty = { items: [], total: 0, page: 1, pageSize: 20 as const };
+const peru = await safe(() => listTeams(db, { pais: 'pe' }), empty);
+const todos = await safe(() => listTeams(db, {}), empty);
+const peruIds = new Set(peru.items.map((t) => t.id));
+const mundo = todos.items.filter((t) => !peruIds.has(t.id) && t.pais !== 'pe').slice(0, 8);
+const peruTop = peru.items.slice(0, 8);
+---
+<Base title="Path: encuentra con quién construir" description="Explora equipos, proyectos y personas de universidades y colegios. Empieza por Perú y mira el resto del mundo.">
+  <section class="hero">
+    <h1>Encuentra el equipo con quien construir tu próximo proyecto</h1>
+    <p>Path reúne equipos estudiantiles, proyectos y personas. Cada ficha te lleva a su propia página para que les escribas directo.</p>
+    <FilterBar action="/explorar" values={{}} facets={{ paises: FACET_PAISES, areas: FACET_AREAS }} />
+  </section>
+
+  <section class="bloque" aria-labelledby="peru">
+    <h2 id="peru">Equipos en Perú</h2>
+    {peruTop.length ? (
+      <ul class="grid" role="list">{peruTop.map((t) => <li><TeamCard team={t} /></li>)}</ul>
+    ) : (
+      <EmptyState title="Aún no hay equipos de Perú aquí. Registra el tuyo y sé el primero." action={{ label: 'Crear mi equipo', href: '/cuenta/equipos/nuevo' }} />
+    )}
+    <p><a href="/explorar?tab=equipos&pais=pe">Ver todos los equipos de Perú →</a></p>
+  </section>
+
+  <section class="bloque" aria-labelledby="mundo">
+    <h2 id="mundo">Equipos del mundo</h2>
+    {mundo.length ? (
+      <ul class="grid" role="list">{mundo.map((t) => <li><TeamCard team={t} /></li>)}</ul>
+    ) : (
+      <EmptyState title="Todavía no hay equipos de otros países." action={{ label: 'Explorar todo', href: '/explorar' }} />
+    )}
+    <p><a href="/explorar">Explorar equipos, proyectos y personas →</a></p>
+  </section>
+</Base>

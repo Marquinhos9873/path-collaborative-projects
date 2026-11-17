@@ -1,0 +1,14 @@
+---
+import { renderReadme } from '../../lib/markdown';
+interface Props { md: string }
+const { md } = Astro.props;
+let html = '';
+try {
+  html = renderReadme(md ?? '');
+} catch {
+  html = '';
+}
+---
+{html
+  ? <div class="readme" set:html={html} />
+  : <p class="readme-empty">Todavía no hay README en esta ficha.</p>}

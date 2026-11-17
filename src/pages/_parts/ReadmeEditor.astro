@@ -1,0 +1,37 @@
+---
+// Textarea de README con contador y vista previa (único bloque que requiere JS).
+interface Props { value?: string; max?: number }
+const { value = '', max = 20000 } = Astro.props;
+---
+<div class="readme-editor" data-max={max}>
+  <label for="readme">README (Markdown, sin imágenes; stickers con :cohete:)</label>
+  <textarea id="readme" name="readme" rows="14" maxlength={max}>{value}</textarea>
+  <p class="contador"><span data-count>{value.length}</span> / {max} caracteres</p>
+  <button type="button" data-preview hidden>Vista previa</button>
+  <p class="preview-msg" role="status" aria-live="polite"></p>
+  <div class="readme preview" data-out hidden></div>
+</div>
+<script>
+  document.querySelectorAll<HTMLElement>('.readme-editor').forEach((box) => {
+    const ta = box.querySelector('textarea')!;
+    const count = box.querySelector('[data-count]')!;
+    const btn = box.querySelector<HTMLButtonElement>('[data-preview]')!;
+    const out = box.querySelector<HTMLElement>('[data-out]')!;
+    const msg = box.querySelector('.preview-msg')!;
+    btn.hidden = false;
+    ta.addEventListener('input', () => { count.textContent = String(ta.value.length); });
+    btn.addEventListener('click', async () => {
+      msg.textContent = 'Generando vista previa…';
+      try {
+        const r = await fetch('/api/preview', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ md: ta.value }) });
+        if (!r.ok) { msg.textContent = r.status === 401 ? 'Tu sesión venció. Entra de nuevo.' : 'No pudimos generar la vista previa (¿README muy largo?).'; return; }
+        const data = await r.json();
+        out.innerHTML = data.html; // HTML ya sanitizado en el servidor
+        out.hidden = false;
+        msg.textContent = '';
+      } catch {
+        msg.textContent = 'No pudimos generar la vista previa. Inténtalo de nuevo.';
+      }
+    });
+  });
+</script>

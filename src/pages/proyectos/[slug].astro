@@ -1,0 +1,35 @@
+---
+import NotFound from '../_parts/NotFound.astro';
+import Base from '../../layouts/Base.astro';
+import Chip from '../../components/ui/Chip.astro';
+import Readme from '../_parts/Readme.astro';
+import ReportButton from '../_parts/ReportButton.astro';
+import { getProjectBySlug } from '../../lib/db';
+import { safe, safeHttps, paisNombre } from '../_parse';
+
+const project = await safe(() => getProjectBySlug(Astro.locals.db, Astro.params.slug ?? ''), null);
+const missing = !project || project.estado === 'hidden';
+if (missing) Astro.response.status = 404;
+const enlace = safeHttps(project?.enlace);
+---
+<Base title={project?.nombre ?? 'No encontrada'} description={project?.resumen}>
+  {missing || !project ? <NotFound /> : (
+  <article class="ficha">
+    <header>
+      <p class="kicker">Proyecto{project.pais ? ` · ${paisNombre(project.pais)}` : ''}</p>
+      <h1>{project.nombre}</h1>
+      <p class="resumen">{project.resumen}</p>
+      {project.perfiles_buscados.length > 0 && (
+        <>
+          <h2>Perfiles que buscan</h2>
+          <ul class="chips" role="list">{project.perfiles_buscados.map((p) => <li><Chip label={p} /></li>)}</ul>
+        </>
+      )}
+      {project.area && <ul class="chips" role="list"><li><Chip label={project.area} /></li></ul>}
+      {enlace && <a class="btn" href={enlace} target="_blank" rel="noopener nofollow">Ir a su página ↗</a>}
+    </header>
+    <Readme md={project.readme} />
+    <footer><ReportButton kind="project" id={project.id} /></footer>
+  </article>
+  )}
+</Base>

@@ -1,0 +1,35 @@
+---
+import Base from '../../../layouts/Base.astro';
+import TeamForm from '../../_parts/TeamForm.astro';
+import { createTeam } from '../../../lib/db';
+import { parseTeamForm } from '../../_parse';
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/entrar');
+
+let errors: string[] = [];
+let values = {};
+if (Astro.request.method === 'POST') {
+  const { value, errors: errs } = parseTeamForm(await Astro.request.formData());
+  values = value;
+  errors = errs;
+  if (errs.length === 0) {
+    try {
+      const team = await createTeam(Astro.locals.db, user.id, value);
+      return Astro.redirect(`/equipos/${team.slug}`, 303);
+    } catch {
+      errors = ['No pudimos crear el equipo. Inténtalo de nuevo.'];
+      Astro.response.status = 500;
+    }
+  } else {
+    Astro.response.status = 400;
+  }
+}
+---
+<Base title="Crear equipo">
+  <section class="cuenta">
+    <h1>Crea la ficha de tu equipo</h1>
+    <p>Cuéntales a otras personas qué hacen y cómo sumarse. Sin imágenes: tu README y un enlace a tu web bastan.</p>
+    <TeamForm values={values} errors={errors} action="/cuenta/equipos/nuevo" submit="Publicar equipo" />
+  </section>
+</Base>

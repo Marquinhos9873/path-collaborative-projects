@@ -1,0 +1,46 @@
+---
+import NotFound from '../_parts/NotFound.astro';
+import Base from '../../layouts/Base.astro';
+import StatusBadge from '../../components/ui/StatusBadge.astro';
+import Chip from '../../components/ui/Chip.astro';
+import Readme from '../_parts/Readme.astro';
+import ReportButton from '../_parts/ReportButton.astro';
+import { getTeamBySlug } from '../../lib/db';
+import { safe, safeHttps, paisNombre } from '../_parse';
+
+const team = await safe(() => getTeamBySlug(Astro.locals.db, Astro.params.slug ?? ''), null);
+const missing = !team || team.estado === 'hidden';
+if (missing) Astro.response.status = 404;
+const enlace = safeHttps(team?.enlace);
+const user = Astro.locals.user;
+const esDueno = !!user && team?.owner_id === user.id;
+const aExt: Record<string, string> = { si: 'Abierto a externos', no: 'Solo para su universidad', por_confirmar: 'Apertura a externos por confirmar' };
+---
+<Base title={team?.nombre ?? 'No encontrada'} description={team?.resumen}>
+  {missing || !team ? <NotFound /> : (
+  <article class="ficha">
+    <header>
+      <p class="kicker">{team.tipo}{team.pais ? ` · ${paisNombre(team.pais)}` : ''}</p>
+      <h1>{team.nombre}</h1>
+      <StatusBadge kind={team.reclutando === 'si' ? 'reclutando' : team.reclutando === 'no' ? 'cerrado' : 'por_confirmar'} />
+      <p class="resumen">{team.resumen}</p>
+      <ul class="chips" role="list">
+        {team.area && <li><Chip label={team.area} /></li>}
+        {team.modalidad && <li><Chip label={team.modalidad} /></li>}
+        {team.nivel && <li><Chip label={team.nivel} /></li>}
+        <li><Chip label={aExt[team.abierto_a_externos] ?? aExt.por_confirmar} /></li>
+      </ul>
+      <dl class="datos">
+        {team.ciclo_anual && (<><dt>Ciclo</dt><dd>{team.ciclo_anual}</dd></>)}
+        {team.proxima_apertura && (<><dt>Próxima apertura</dt><dd>{team.proxima_apertura}</dd></>)}
+        {team.origen === 'curado' && (<><dt>Verificado</dt><dd>{team.verificado_en ? <time datetime={team.verificado_en}>{team.verificado_en}</time> : 'por confirmar'}</dd></>)}
+      </dl>
+      {team.origen === 'curado' && !team.owner_id && <p class="aviso">Ficha listada por Path, aún sin reclamar. Los datos marcados como "por confirmar" no están verificados.</p>}
+      {enlace && <a class="btn" href={enlace} target="_blank" rel="noopener nofollow">Ir a su página ↗</a>}
+      {esDueno && <a href={`/cuenta/equipos/${team.slug}/editar`}>Editar ficha</a>}
+    </header>
+    <Readme md={team.readme} />
+    <footer><ReportButton kind="team" id={team.id} /></footer>
+  </article>
+  )}
+</Base>
