@@ -1,0 +1,56 @@
+---
+import { isAdmin } from '../../lib/auth';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/entrar');
+if (!isAdmin(user, (Astro.locals as any).runtime?.env ?? {})) {
+  return new Response('Acceso restringido', { status: 403 });
+}
+
+const TABLES = { team: 'teams', project: 'projects', user: 'users' } as const;
+const { results } = await Astro.locals.db
+  .prepare('SELECT id, kind, target_id, motivo, creado FROM reports WHERE resuelto = 0 ORDER BY creado DESC LIMIT 200')
+  .all<{ id: string; kind: keyof typeof TABLES; target_id: string; motivo: string; creado: string }>();
+
+const reportes = await Promise.all(
+  results.map(async (r) => {
+    const t = await Astro.locals.db
+      .prepare(`SELECT nombre, estado FROM ${TABLES[r.kind]} WHERE id = ?`)
+      .bind(r.target_id)
+      .first<{ nombre: string; estado: string }>();
+    return { ...r, nombre: t?.nombre ?? '(ficha eliminada)', estado: t?.estado ?? 'hidden' };
+  }),
+);
+const etiqueta = { team: 'Equipo', project: 'Proyecto', user: 'Persona' } as const;
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Reportes · Path</title>
+  </head>
+  <body>
+    <main style="max-width:48rem;margin:2rem auto;padding:0 1rem;font-family:system-ui,sans-serif">
+      <h1>Reportes pendientes</h1>
+      {reportes.length === 0 && <p>No hay reportes pendientes. Todo en orden.</p>}
+      <ul style="list-style:none;padding:0">
+        {reportes.map((r) => (
+          <li style="border:1px solid #ccc;border-radius:8px;padding:1rem;margin-bottom:1rem">
+            <p><strong>{etiqueta[r.kind]}:</strong> {r.nombre} <small>({r.estado === 'hidden' ? 'oculta' : 'visible'})</small></p>
+            <p>{r.motivo}</p>
+            <small>{r.creado}</small>
+            <form method="post" action="/api/admin/hide">
+              <input type="hidden" name="kind" value={r.kind} />
+              <input type="hidden" name="id" value={r.target_id} />
+              <button type="submit">Ocultar ficha</button>
+            </form>
+          </li>
+        ))}
+      </ul>
+    </main>
+  </body>
+</html>
