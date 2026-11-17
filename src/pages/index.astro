@@ -24,7 +24,7 @@ const peruTop = peru.items.slice(0, 8);
   <section class="bloque" aria-labelledby="peru">
     <h2 id="peru">Equipos en Perú</h2>
     {peruTop.length ? (
-      <ul class="grid" role="list">{peruTop.map((t) => <li><TeamCard team={t} /></li>)}</ul>
+      <ul class="trail" role="list">{peruTop.map((t) => <li><TeamCard team={t} /></li>)}</ul>
     ) : (
       <EmptyState title="Aún no hay equipos de Perú aquí. Registra el tuyo y sé el primero." action={{ label: 'Crear mi equipo', href: '/cuenta/equipos/nuevo' }} />
     )}
@@ -34,7 +34,7 @@ const peruTop = peru.items.slice(0, 8);
   <section class="bloque" aria-labelledby="mundo">
     <h2 id="mundo">Equipos del mundo</h2>
     {mundo.length ? (
-      <ul class="grid" role="list">{mundo.map((t) => <li><TeamCard team={t} /></li>)}</ul>
+      <ul class="trail" role="list">{mundo.map((t) => <li><TeamCard team={t} /></li>)}</ul>
     ) : (
       <EmptyState title="Todavía no hay equipos de otros países." action={{ label: 'Explorar todo', href: '/explorar' }} />
     )}

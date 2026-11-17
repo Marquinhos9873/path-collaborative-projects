@@ -46,7 +46,7 @@ const labels: Record<string, string> = { equipos: 'Equipos', proyectos: 'Proyect
         action={{ label: 'Limpiar filtros', href: `/explorar?tab=${tab}` }}
       />
     ) : (
-      <ul class="grid" role="list">
+      <ul class="trail" role="list">
         {teams && teams.items.map((t) => <li><TeamCard team={t} /></li>)}
         {projects && projects.items.map((p) => <li><ProjectCard project={p} /></li>)}
         {people && people.items.map((u) => <li><PersonCard user={u} /></li>)}
